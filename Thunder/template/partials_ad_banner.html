@@ -1,0 +1,8 @@
+{% macro banner(slot_id, code, classes='') -%}
+<div class="ad-banner {{ classes }}" data-ad-slot="{{ slot_id }}" {% if code %}data-ad-code="{{ code | e }}"{% endif %}>
+  <div class="ad-banner__inner">
+    <span class="ad-banner__label">Sponsored</span>
+    <div class="ad-banner__content" aria-label="Advertisement slot"></div>
+  </div>
+</div>
+{%- endmacro %}
