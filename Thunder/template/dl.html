@@ -1,27 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta property="og:image" content="https://cdn.jsdelivr.net/gh/fyaz05/Resources@main/FileToLink/live.png">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Downloading: {{ file_name }}</title>
-    <meta http-equiv="refresh" content="0;url={{ src }}">
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 40px; color: #333; margin: 0; }
-        .container { max-width: 600px; margin: auto; }
-        p { margin-bottom: 20px; font-size: 1em; }
-        a { color: #0066cc; text-decoration: none; font-weight: bold; }
-        a:hover { text-decoration: underline; }
-        .message { padding: 20px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="message">
-            <p>Your download for <strong>{{ file_name }}</strong> should start automatically.</p>
-            <p>If it doesn't, please <a href="{{ src }}" download="{{ file_name }}">click here to download</a>.</p>
-        </div>
-    </div>
-</body>
-</html>
+<!doctype html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>Download {{ file_name }}</title><style>body{margin:0;min-height:100vh;display:grid;place-items:center;font-family:Inter,system-ui;background:#0d1328;color:#e7ecff}.box{max-width:680px;background:#162043;border:1px solid #2b3e74;border-radius:16px;padding:24px}.btn{background:#5f8bff;color:#fff;border:0;padding:11px 15px;border-radius:12px;font-weight:700;cursor:pointer}.btn[disabled]{opacity:.6}.msg{color:#9fb0da}</style></head>
+<body><div class='box'><h2>Secure Download</h2><p class='msg'>{{ file_name }}</p><p id='status' class='msg'>Click continue to open sponsor link and start download.</p><button class='btn' id='continueBtn'>Continue Download</button> <button class='btn' id='retryBtn' style='display:none'>Retry</button></div>
+<script>
+const dl={{ src|tojson }}, ad={{ direct_download_ad_url|tojson }}, cd={{ download_ad_cooldown_ms|tojson }};const k='adg_'+btoa(dl).slice(0,20);let started=false;
+function setStatus(s){status.textContent=s} function cool(){return Date.now()-Number(sessionStorage.getItem(k)||0)<cd;} function mark(){sessionStorage.setItem(k,String(Date.now()));}
+function triggerDownload(){if(started)return;started=true;const a=document.createElement('a');a.href=dl;a.download={{ file_name|tojson }};document.body.appendChild(a);a.click();a.remove();setStatus('Download started.');}
+function startFlow(){if(cool())return setStatus('Please wait before trying again.');continueBtn.disabled=true;setStatus('Opening sponsor tab...');const w=window.open(ad,'_blank','noopener,noreferrer');if(!w){setStatus('Popup blocked. Please allow popups and retry.');retryBtn.style.display='inline-block';continueBtn.disabled=false;return;}mark();setStatus('Sponsor opened. Starting download...');setTimeout(triggerDownload,800);}
+continueBtn.onclick=startFlow;retryBtn.onclick=()=>{retryBtn.style.display='none';startFlow();};
+</script></body></html>
