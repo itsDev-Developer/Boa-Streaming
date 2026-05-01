@@ -30,6 +30,7 @@
         <h1 class="title">{{ file_name }}</h1>
         <div class="actions">
           <a class="btn primary" href="{{ src }}" id="downloadBtn" download="{{ file_name }}">Download</a>
+          <button class="btn" id="shareBtn" type="button">Share</button>
           <button class="btn" id="copyBtn" type="button">Copy Link</button>
         </div>
       </header>
@@ -52,12 +53,33 @@
     const isHls = /\.m3u8(\?|$)/i.test(sourceUrl);
     player.src({src:sourceUrl,type:isHls?'application/x-mpegURL':'video/mp4'});
     if (player.httpSourceSelector) player.httpSourceSelector();
-    if (adTagUrl){ player.ima({adTagUrl}); }
+    if (adTagUrl){
+      player.ima({
+        adTagUrl,
+        requestMode: 'onplay',
+      });
+    }
+    let adsInitDone = false;
+    function initAdsOnce(){
+      if (adsInitDone || !adTagUrl) return;
+      adsInitDone = true;
+      try { player.ima.initializeAdDisplayContainer(); } catch(e) {}
+    }
+    player.one('play', initAdsOnce);
+    player.one('touchstart', initAdsOnce);
+    player.one('click', initAdsOnce);
     const shownMid = new Set(); let postPlayed=false;
     player.on('timeupdate',()=>{ const t=player.currentTime()||0; midRolls.forEach((m,i)=>{ if(t>=m && !shownMid.has(i) && adTagUrl){ shownMid.add(i); player.ima.changeAdTag(adTagUrl); player.ima.requestAds(); }}); });
     player.on('ended',()=>{ if(postRoll && !postPlayed && adTagUrl){ postPlayed=true; player.ima.changeAdTag(adTagUrl); player.ima.requestAds(); }});
     player.on('adserror',()=>player.play()); player.on('adend',()=>player.play());
     document.getElementById('copyBtn').onclick=async()=>{await navigator.clipboard.writeText(sourceUrl);};
+    document.getElementById('shareBtn').onclick=async()=>{
+      if (navigator.share){
+        try { await navigator.share({ title: document.title, text: {{ file_name|tojson }}, url: sourceUrl }); return; } catch(e) {}
+      }
+      await navigator.clipboard.writeText(sourceUrl);
+      alert('Share is unavailable on this device. Link copied.');
+    };
 
     function lazyLoadAds(){document.querySelectorAll('.ad-banner').forEach((slot)=>{const io=new IntersectionObserver((e)=>{if(e[0].isIntersecting){const c=slot.querySelector('.ad-banner__content');const code=slot.dataset.adCode;slot.classList.remove('is-loading');c.innerHTML=code||'<small style="color:#9fb0da">Ad slot: '+slot.dataset.adSlot+'</small>';io.disconnect();}}, {rootMargin:'180px'});io.observe(slot);});}
     lazyLoadAds();
