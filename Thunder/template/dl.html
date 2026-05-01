@@ -1,10 +1,15 @@
 <!doctype html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>
-<title>Download {{ file_name }}</title><style>body{margin:0;font-family:Inter,system-ui;background:#0d1328;color:#e7ecff;display:grid;place-items:center;min-height:100vh} .box{max-width:640px;background:#162043;border:1px solid #2b3e74;border-radius:16px;padding:22px} .btn{display:inline-block;background:#5f8bff;color:#fff;text-decoration:none;padding:11px 16px;border-radius:12px;font-weight:700} .muted{color:#9fb0da}</style></head>
-<body><div class='box'><h2>Preparing download</h2><p class='muted'>File: <b>{{ file_name }}</b></p><p id='status' class='muted'>Click continue to open sponsor and start download securely.</p><button class='btn' id='continueBtn'>Continue Download</button></div>
+<title>Download {{ file_name }}</title>
+<style>body{margin:0;font-family:Inter,system-ui;background:#0d1328;color:#e7ecff;display:grid;place-items:center;min-height:100vh}.box{max-width:680px;background:#162043;border:1px solid #2b3e74;border-radius:16px;padding:22px}.btn{display:inline-block;background:#5f8bff;color:#fff;border:0;padding:11px 16px;border-radius:12px;font-weight:700;cursor:pointer}.btn[disabled]{opacity:.65;cursor:not-allowed}.muted{color:#9fb0da}.warn{color:#ffcf6d}</style></head>
+<body><div class='box'><h2>Secure Download Gateway</h2><p class='muted'>File: <b>{{ file_name }}</b></p><p id='status' class='muted'>Click continue to open sponsor tab, then your download starts automatically.</p><button class='btn' id='continueBtn'>Continue Download</button><button class='btn' id='fallbackBtn' style='display:none;margin-left:8px'>Open sponsor manually</button></div>
 <script>
-const dl={{ src|tojson }}, ad={{ direct_download_ad_url|tojson }}, cooldownMs={{ download_ad_cooldown_ms|tojson }}; const key='dl_cooldown_'+btoa(dl).slice(0,16);
-function inCooldown(){const t=Number(localStorage.getItem(key)||0);return Date.now()-t<cooldownMs;} function mark(){localStorage.setItem(key,Date.now());}
-async function run(){const s=document.getElementById('status'); if(inCooldown()){s.textContent='Cooldown active. Please wait before retrying.'; return;} const w=window.open(ad,'_blank','noopener,noreferrer'); if(!w){s.textContent='Popup blocked. Allow popups and retry.'; return;}
-mark(); s.textContent='Ad opened. Starting your download...'; setTimeout(()=>{const a=document.createElement('a');a.href=dl;a.download={{ file_name|tojson }};document.body.appendChild(a);a.click();a.remove();},900);}
-document.getElementById('continueBtn').addEventListener('click',run);
+const dl={{ src|tojson }}, ad={{ direct_download_ad_url|tojson }}, cooldownMs={{ download_ad_cooldown_ms|tojson }}, delayMs=4000;
+const key='dl_cooldown_'+btoa(dl).slice(0,16),btn=document.getElementById('continueBtn'),fb=document.getElementById('fallbackBtn'),st=document.getElementById('status'); let running=false;
+const inCooldown=()=>Date.now()-Number(localStorage.getItem(key)||0)<cooldownMs; const mark=()=>localStorage.setItem(key,Date.now());
+function triggerDownload(){const a=document.createElement('a');a.href=dl;a.download={{ file_name|tojson }};document.body.appendChild(a);a.click();a.remove();}
+function countdown(s){let left=s;st.innerHTML=`<span class='muted'>Sponsor opened. Download starts in <b>${left}</b>s...</span>`;const t=setInterval(()=>{left--;st.innerHTML=`<span class='muted'>Sponsor opened. Download starts in <b>${left}</b>s...</span>`;if(left<=0){clearInterval(t);triggerDownload();btn.disabled=false;btn.textContent='Download Again';running=false;}},1000);}
+btn.onclick=()=>{if(running||inCooldown())return;running=true;btn.disabled=true;btn.textContent='Processing...'; const w=window.open(ad,'_blank','noopener,noreferrer');
+ if(!w||w.closed||typeof w.closed==='undefined'){st.innerHTML="<span class='warn'>Popup blocked. Use manual sponsor open, then continue.</span>";fb.style.display='inline-block';btn.disabled=false;btn.textContent='Retry';running=false;return;}
+ mark();countdown(Math.floor(delayMs/1000));};
+fb.onclick=()=>{window.open(ad,'_blank','noopener,noreferrer');st.textContent='After sponsor opens, click continue again to start timed download.';};
 </script></body></html>

@@ -589,3 +589,31 @@ DOWNLOAD_AD_COOLDOWN_MS=30000
 - If playback freezes after ads, ensure the ad server returns valid media and test with a known-good sample VAST tag.
 - If download ad does not open, browser popup blocking is enabled: allow popups for your domain.
 - If quality selector does not show for MP4, this is expected when only a single rendition is available.
+
+## Frontend Player & Ads Setup (Updated)
+
+The watch/download frontend has been upgraded with a new OTT-style UI and hardened ad flow.
+
+### Watch page upgrades
+- Video.js upgraded to `8.23.4`.
+- IMA SDK loaded before player bootstrapping.
+- Correct dependency order: `video.js` → `videojs-contrib-ads` → `videojs-ima`.
+- Pre-roll, mid-roll, and post-roll ad requests with automatic fallback to content playback.
+- Mid-roll markers support percentages (`25,50,75`) and absolute seconds.
+- Resume playback memory via localStorage.
+- Keyboard shortcuts, PiP, skip buttons, theater mode, and share menu.
+
+### Direct-download sponsor flow
+- Single-click lock to prevent duplicate actions.
+- Popup-blocker detection and manual fallback button.
+- Countdown delay before automatic file download.
+- Cooldown-aware flow to avoid abuse.
+
+### Relevant environment variables
+- `VIDEO_VAST_AD_TAG_URL`
+- `VIDEO_MIDROLL_MARKERS`
+- `VIDEO_POSTROLL_ENABLED`
+- `DIRECT_DOWNLOAD_AD_URL`
+- `DOWNLOAD_AD_COOLDOWN_MS`
+- `BANNER_TOP_AD_CODE`
+- `BANNER_BOTTOM_AD_CODE`
