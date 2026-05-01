@@ -2,135 +2,109 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>{{file_name}} | {{name}}</title>
+  <title>{{ file_name }} | Stream</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" href="https://i.ibb.co/qJyZWCv/20230629-081948-0000.png">
 
-  <!-- Bootstrap & Tailwind -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Video.js + IMA -->
-  <link href="https://vjs.zencdn.net/7.20.3/video-js.min.css" rel="stylesheet" />
-  <link href="https://cdn.jsdelivr.net/npm/videojs-ima@1.9.1/dist/videojs.ima.min.css" rel="stylesheet" />
+  <link href="https://vjs.zencdn.net/8.17.4/video-js.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/videojs-ima@2.4.0/dist/videojs.ima.css" rel="stylesheet" />
 
   <style>
-    .video-container {
-      max-width: 960px;
-      margin: 20px auto;
-      position: relative;
-      aspect-ratio: 16/9;
-    }
-    .video-js {
-      width: 100% !important;
-      height: 100% !important;
-    }
+    body { background:#070b17; color:#e7ecff; }
+    .video-container { max-width: 960px; margin: 20px auto; aspect-ratio: 16/9; }
+    .video-js { width: 100% !important; height: 100% !important; }
+    .meta { color:#9fb0da; }
   </style>
 </head>
-<body class="bg-black text-light">
+<body>
+  <div class="container py-4">
+    <h4 class="text-center mb-2">{{ file_name }}</h4>
+    <p class="text-center meta mb-3">If playback does not start, use the direct link button below.</p>
 
-  <!-- Navbar -->
-  <nav class="navbar bg-dark p-3">
-    <div class="container-fluid">
-      <a class="navbar-brand text-light" href="{{link}}">
-        <span class="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500 text-xl">{{name}}</span>
-      </a>
+    <div class="video-container">
+      <video id="video_player" class="video-js vjs-big-play-centered" controls preload="auto" playsinline></video>
     </div>
-  </nav>
 
-  <!-- Video Title -->
-  <div class="text-center mt-4 text-lg font-bold">{{file_name}}</div>
-
-  <!-- Video Container -->
-  <div class="video-container">
-    <video id="video_player"
-           class="video-js vjs-default-skin vjs-big-play-centered"
-           controls preload="auto"
-           poster="https://ibb.co/GQztcbCV"
-           data-setup='{"fluid": true}'>
-    </video>
+    <div class="text-center mt-3 d-flex flex-wrap gap-2 justify-content-center">
+      <a href="{{ direct_download_url }}" class="btn btn-primary" target="_blank" rel="noopener">Direct Download</a>
+      <a href="{{ src }}" class="btn btn-outline-light" target="_blank" rel="noopener">Open Stream Link</a>
+    </div>
   </div>
 
-  <!-- Download Button -->
-  <div class="text-center mt-3">
-    <a href="https://www.profitableratecpm.com/rmgu5czv?key=2fced1ad59f40ab38211998ff23452e9" target="_blank"
-       class="bg-blue-500 hover:bg-blue-700 text-black font-bold py-2 px-4 rounded">
-      Download Here
-    </a>
-  </div>
-
-  <!-- Warnings & Disclaimer -->
-  <div class="text-center text-sm bg-danger p-2 rounded w-75 mx-auto mt-4">
-    ⚠️ Video Not Playing? Try using another browser.
-  </div>
-  <div class="text-center text-sm bg-danger p-2 rounded w-75 mx-auto mt-2 mb-5">
-    ⚠️ Disclaimer: This site does not host videos. Media is from third-party sources.
-  </div>
-
-  <!-- Footer -->
-  <footer class="bg-dark text-center text-xs text-light p-3">
-    © <script>document.write(new Date().getFullYear())</script> 
-    <a href="{{link}}" class="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500">{{name}}</a>
-    All Rights Reserved
-  </footer>
-
-  <!-- Scripts -->
-  <script src="https://vjs.zencdn.net/7.20.3/video.min.js"></script>
+  <script src="https://vjs.zencdn.net/8.17.4/video.min.js"></script>
   <script src="https://imasdk.googleapis.com/js/sdkloader/ima3.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/videojs-contrib-ads@6.9.0/dist/videojs-contrib-ads.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/videojs-ima@1.9.1/dist/videojs.ima.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/videojs-ima@2.4.0/dist/videojs.ima.umd.js"></script>
 
   <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const sourceUrl = "{{src}}";
-      const player = videojs('video_player');
+    document.addEventListener('DOMContentLoaded', () => {
+      const sourceUrl = {{ src | tojson }};
+      const vastTag = {{ vast_ad_tag_url | tojson }};
+      const midrollMarkers = {{ midroll_markers | tojson }};
+      const postrollEnabled = {{ postroll_enabled | tojson }};
 
-      // IMA plugin setup
-      player.ima({
-        id: 'video_player',
-        adTagUrl: 'VIDEO_VAST_AD_TAG_URL',
-        debug: false,
-        timeout: 5000,
-        prerollTimeout: 5000
+      const player = videojs('video_player', {
+        autoplay: false,
+        controls: true,
+        preload: 'auto',
+        fluid: true,
+        html5: { vhs: { overrideNative: true } }
       });
 
-      player.ready(function () {
-        player.ima.initializeAdDisplayContainer();
+      player.src({ src: sourceUrl, type: 'video/mp4' });
 
-        // Catch ad errors and fallback
-        player.on('aderror', () => { player.play(); });
+      let adInitialized = false;
+      const shownMarkers = new Set();
 
-        // Pre-roll ads
-        player.ima.requestAds();
-        player.play();
-
-        // Mid-roll (pause trigger)
-        player.on('pause', function () {
-          if (!player.ima.adIsPlaying()) {
-            player.ima.changeAdTag('VIDEO_VAST_AD_TAG_URL');
-            player.ima.requestAds();
-            player.play();
-          }
-        });
-
-        // Post-roll on ended
-        player.on('ended', function () {
-          player.ima.changeAdTag('VIDEO_VAST_AD_TAG_URL');
+      const requestAd = () => {
+        if (!adInitialized || !vastTag) return;
+        try {
+          player.ima.changeAdTag(vastTag);
           player.ima.requestAds();
-        });
-      });
-    });
-  </script>
+        } catch (_) {}
+      };
 
-  <!-- Prevent DevTools & Right-Click -->
-  <script>
-    document.addEventListener("contextmenu", e => e.preventDefault());
-    document.addEventListener('keydown', e => {
-      if (e.key === 'F12' ||
-         (e.ctrlKey && e.shiftKey && 'I') ||
-         (e.ctrlKey && e.key === 'u') ||
-         e.ctrlKey || e.shiftKey || e.altKey
-      ) e.preventDefault();
+      if (vastTag) {
+        player.ima({
+          id: 'video_player',
+          adTagUrl: vastTag,
+          debug: false,
+          timeout: 6000
+        });
+
+        player.ready(() => {
+          try {
+            player.ima.initializeAdDisplayContainer();
+            adInitialized = true;
+          } catch (_) {}
+        });
+
+        player.on('aderror', () => {
+          if (player.paused()) player.play().catch(() => {});
+        });
+      }
+
+      player.on('play', () => {
+        if (vastTag && adInitialized) requestAd();
+      });
+
+      player.on('timeupdate', () => {
+        if (!vastTag || !adInitialized || !Array.isArray(midrollMarkers)) return;
+        const current = Math.floor(player.currentTime() || 0);
+        for (const marker of midrollMarkers) {
+          if (!shownMarkers.has(marker) && current >= marker) {
+            shownMarkers.add(marker);
+            requestAd();
+            break;
+          }
+        }
+      });
+
+      if (postrollEnabled) {
+        player.on('ended', () => {
+          requestAd();
+        });
+      }
     });
   </script>
 </body>
