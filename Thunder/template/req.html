@@ -1,78 +1,321 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>{{ heading }}</title>
-  <link href="https://vjs.zencdn.net/8.23.4/video-js.css" rel="stylesheet" />
-  <style>
-    :root{--bg:#090d1a;--panel:#11192f;--text:#ecf1ff;--muted:#9baed8;--brand:#7c5cff;--brand2:#16a3ff;--line:#2a3761}
-    *{box-sizing:border-box} body{margin:0;background:radial-gradient(circle at top,#1a2851,var(--bg));font-family:Inter,system-ui;color:var(--text)}
-    .wrap{max-width:1200px;margin:auto;padding:16px}.panel{background:linear-gradient(180deg,#18264b,#0f162e);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:0 24px 60px #0008}
-    .head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}.title{margin:0;font-size:clamp(1.1rem,2.3vw,1.65rem)}.muted{color:var(--muted);margin:.3rem 0 0}
-    .actions{display:flex;gap:10px;flex-wrap:wrap}.btn{border:1px solid #3f528d;border-radius:12px;padding:10px 14px;background:#202f5a;color:#fff;font-weight:700;text-decoration:none;cursor:pointer}
-    .btn.primary{border:0;background:linear-gradient(90deg,var(--brand),var(--brand2))}
-    .video-shell{margin-top:14px;border-radius:14px;overflow:hidden;background:#000;aspect-ratio:16/9;position:relative}.video-js{width:100%;height:100%}
-    .rail{display:grid;grid-template-columns:1fr 320px;gap:14px;margin-top:14px}.side,.meta{background:#0f1730;border:1px solid #273766;border-radius:14px;padding:12px}
-    .chip{display:inline-block;padding:4px 8px;border-radius:999px;border:1px solid #33477b;color:#c7d7ff;font-size:.8rem}
-    .ad-banner{margin:10px 0}.ad-banner__inner{min-height:85px;border:1px dashed #4560a5;border-radius:12px;padding:10px;background:#101936}.ad-banner__label{font-size:.72rem;color:#a7b9e3;text-transform:uppercase}
-    .ad-banner.is-loading .ad-banner__content{height:58px;background:linear-gradient(90deg,#1c2a50,#2b3f74,#1c2a50);background-size:260% 100%;animation:s 1.2s linear infinite;border-radius:8px}@keyframes s{to{background-position:-260% 0}}
-    .share-menu{display:none;position:absolute;background:#101936;border:1px solid #415ca1;border-radius:10px;padding:8px;z-index:20}.share-menu.open{display:block}.share-menu button,.share-menu a{display:block;width:100%;margin:4px 0;text-align:left}
-    .theater{max-width:100vw;padding:0}.theater .panel{border-radius:0;border-left:0;border-right:0}
-    @media (max-width:980px){.rail{grid-template-columns:1fr}.wrap{padding:10px}}
-  </style>
-</head>
-<body>
-{% from 'partials_ad_banner.html' import banner %}
-<main class="wrap" id="pageWrap">
-  <section class="panel">
-    <header class="head">
-      <div><h1 class="title">{{ file_name }}</h1><p class="muted">Premium streaming player with ad-safe fallback and quick sharing.</p></div>
-      <div class="actions">
-        <a class="btn primary" href="{{ src }}" id="downloadBtn" download="{{ file_name }}">Download</a>
-        <button class="btn" id="shareBtn" type="button">Share</button>
-        <button class="btn" id="theaterBtn" type="button">Theater</button>
-      </div>
-    </header>
-    <div style="position:relative">{{ banner('video-top', banner_top_ad_code, 'is-loading') }}<div id="shareMenu" class="share-menu"></div></div>
-    <div class="video-shell"><video id="streamPlayer" class="video-js vjs-big-play-centered" controls playsinline preload="metadata"></video></div>
-    {{ banner('video-bottom', banner_bottom_ad_code, 'is-loading') }}
-    <div class="rail"><section class="meta"><span class="chip">HLS + MP4</span> <span class="chip">IMA Ads</span> <span class="chip">Resume Memory</span><p class="muted">Keyboard: <b>Space</b> play/pause, <b>←/→</b> seek, <b>F</b> fullscreen, <b>M</b> mute.</p></section><aside class="side"><h4 style="margin:0 0 8px">Related</h4><p class="muted">Use your bot list/feed here. Layout prepared for thumbnail cards and ad placements.</p></aside></div>
-  </section>
-</main>
-<script src="https://imasdk.googleapis.com/js/sdkloader/ima3.js"></script>
-<script src="https://vjs.zencdn.net/8.23.4/video.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/videojs-contrib-ads@7.5.2/dist/videojs-contrib-ads.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/videojs-ima@2.4.0/dist/videojs.ima.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/videojs-http-source-selector@1.1.6/dist/videojs-http-source-selector.min.js"></script>
-<script>
-(() => {
-const cfg={sourceUrl:{{ src|tojson }},adTagUrl:{{ vast_ad_tag_url|tojson }},midRolls:{{ midroll_markers|tojson }},postRoll:{{ postroll_enabled|tojson }},resumeKey:'resume_'+btoa({{ src|tojson }}).slice(0,20),adTimeoutMs:6500};
-const adState={played:new Set(),post:false,ready:false};
-function adReady(){return !!(window.google&&window.google.ima&&window.videojs&&videojs.getPlugin&&videojs.getPlugin('ima'));}
-function init(){
- if(!window.videojs){setTimeout(init,200);return;}
- const p=videojs('streamPlayer',{fluid:true,responsive:true,playbackRates:[0.5,0.75,1,1.25,1.5,2],controlBar:{pictureInPictureToggle:true,skipButtons:{forward:10,backward:10}}});
- const isHls=/\.m3u8(\?|$)/i.test(cfg.sourceUrl); p.src({src:cfg.sourceUrl,type:isHls?'application/x-mpegURL':'video/mp4'});
- if(p.httpSourceSelector) p.httpSourceSelector();
- p.ready(()=>{const at=Number(localStorage.getItem(cfg.resumeKey)||0);if(at>15)p.currentTime(at);});
- p.on('timeupdate',()=>{localStorage.setItem(cfg.resumeKey,Math.floor(p.currentTime()||0));triggerMid(p);});
- p.on('ended',()=>{if(cfg.postRoll&&!adState.post){adState.post=true;requestAd(p,'postroll');}});
- p.on('adserror',()=>safeResume(p,'adserror')); p.on('adtimeout',()=>safeResume(p,'adtimeout')); p.on('error',()=>{if(p.error())p.play().catch(()=>{});});
- initIma(p); bindUI(p);
- }
- function initIma(p){if(!cfg.adTagUrl||!adReady()) return; p.ima({adTagUrl:cfg.adTagUrl,timeout:cfg.adTimeoutMs,debug:false,autoPlayAdBreaks:false}); adState.ready=true;
- p.one('play',()=>{requestAd(p,'preroll');});}
- function requestAd(p,type){if(!adState.ready||!cfg.adTagUrl) return; try{p.ima.changeAdTag(cfg.adTagUrl); p.ima.requestAds(); setTimeout(()=>safeResume(p,'ad-fallback-'+type),cfg.adTimeoutMs+1000);}catch{safeResume(p,'ad-exception-'+type);}}
- function triggerMid(p){const d=p.duration()||0,t=p.currentTime()||0;if(!d||!cfg.midRolls?.length) return; cfg.midRolls.forEach((m,i)=>{const mark = m<=100 ? (d*(m/100)) : m; if(t>=mark && !adState.played.has(i)){adState.played.add(i);requestAd(p,'midroll-'+i);}})}
- function safeResume(p){if(p.paused()) p.play().catch(()=>{});} 
- function bindUI(p){document.addEventListener('keydown',(e)=>{if(e.target.tagName==='INPUT')return; if(e.code==='Space'){e.preventDefault();p.paused()?p.play():p.pause();} if(e.key==='f')p.requestFullscreen(); if(e.key==='m')p.muted(!p.muted()); if(e.key==='ArrowRight')p.currentTime((p.currentTime()||0)+10); if(e.key==='ArrowLeft')p.currentTime((p.currentTime()||0)-10);});
- const wrap=document.getElementById('pageWrap'); document.getElementById('theaterBtn').onclick=()=>wrap.classList.toggle('theater');
- const shareBtn=document.getElementById('shareBtn'),menu=document.getElementById('shareMenu'); const url=location.href;
- shareBtn.onclick=async()=>{if(navigator.share){try{await navigator.share({title:document.title,url});return;}catch{}} menu.classList.toggle('open');menu.innerHTML=`<button class='btn' id='copyLink'>Copy link</button><a class='btn' target='_blank' href='https://wa.me/?text=${encodeURIComponent(url)}'>WhatsApp</a><a class='btn' target='_blank' href='https://t.me/share/url?url=${encodeURIComponent(url)}'>Telegram</a><a class='btn' target='_blank' href='https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}'>Twitter/X</a>`; document.getElementById('copyLink').onclick=async()=>{await navigator.clipboard.writeText(url);menu.classList.remove('open');};};
- }
- function lazyBanners(){document.querySelectorAll('.ad-banner').forEach(slot=>{const io=new IntersectionObserver(e=>{if(e[0].isIntersecting){slot.classList.remove('is-loading');slot.querySelector('.ad-banner__content').innerHTML=slot.dataset.adCode||'<small style="color:#9fb0da">Ad slot: '+slot.dataset.adSlot+'</small>';io.disconnect();}},{rootMargin:'160px'});io.observe(slot);});}
- lazyBanners(); init();
+  
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>
+      {{ heading }}
+    </title>
+    <link rel="icon" href="https://i.ibb.co/qJyZWCv/20230629-081948-0000.png"
+    />
+    <link href="https://vjs.zencdn.net/8.23.4/video-js.css" rel="stylesheet"
+    />
+    <style>
+      :root{ --bg:#090d1a; --panel:#11192f; --text:#ecf1ff; --muted:#9baed8;
+      --brand:#7c5cff; --brand2:#16a3ff; --line:#2a3761; } *{box-sizing:border-box}
+      body{ margin:0; background:radial-gradient(circle at top,#1a2851,var(--bg));
+      font-family:Inter,system-ui; color:var(--text); } .wrap{ max-width:1200px;
+      margin:auto; padding:16px; } .panel{ background:linear-gradient(180deg,#18264b,#0f162e);
+      border:1px solid var(--line); border-radius:18px; padding:16px; } .head{
+      display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;
+      } .title{ margin:0; } .muted{ color:var(--muted); } .actions{ display:flex;
+      gap:10px; } .btn{ border:1px solid #3f528d; border-radius:12px; padding:10px
+      14px; background:#202f5a; color:#fff; cursor:pointer; text-decoration:none;
+      } .btn.primary{ border:0; background:linear-gradient(90deg,var(--brand),var(--brand2));
+      } .video-shell{ margin-top:14px; border-radius:14px; overflow:hidden; background:#000;
+      aspect-ratio:16/9; } .video-js{ width:100%; height:100%; } .rail{ display:grid;
+      grid-template-columns:1fr 320px; gap:14px; margin-top:14px; } .side,.meta{
+      background:#0f1730; border:1px solid #273766; border-radius:14px; padding:12px;
+      } .chip{ display:inline-block; padding:4px 8px; border-radius:999px; border:1px
+      solid #33477b; margin-right:6px; } .share-menu{ display:none; position:absolute;
+      right:0; top:40px; background:#101936; border:1px solid #415ca1; border-radius:10px;
+      padding:8px; z-index:100; } .share-menu.open{ display:block; } .share-menu
+      a, .share-menu button{ display:block; width:100%; margin:4px 0; } .theater{
+      max-width:100vw; } .theater .panel{ border-radius:0; } @media (max-width:980px){
+      .rail{ grid-template-columns:1fr; } }
+    </style>
+  </head>
+  
+  <body>
+    {% from 'partials_ad_banner.html' import banner %}
+    <main class="wrap" id="pageWrap">
+      <section class="panel">
+        <header class="head">
+          <div>
+            <h1 class="title">
+              {{ file_name }}
+            </h1>
+            <p class="muted">
+              Premium streaming player with ad-safe fallback and quick sharing.
+            </p>
+          </div>
+          <div class="actions">
+            <a class="btn primary" href="{{ src }}" download="{{ file_name }}">
+              Download
+            </a>
+            <button class="btn" id="shareBtn">
+              Share
+            </button>
+            <button class="btn" id="theaterBtn">
+              Theater
+            </button>
+          </div>
+        </header>
+        <div style="position:relative">
+          {{ banner('video-top', banner_top_ad_code, 'is-loading') }}
+          <div id="shareMenu" class="share-menu">
+          </div>
+        </div>
+        <div class="video-shell">
+          <video id="streamPlayer" class="video-js vjs-big-play-centered" controls
+          playsinline preload="metadata">
+          </video>
+        </div>
+        {{ banner('video-bottom', banner_bottom_ad_code, 'is-loading') }}
+        <div class="rail">
+          <section class="meta">
+            <span class="chip">
+              HLS + MP4
+            </span>
+            <span class="chip">
+              IMA Ads
+            </span>
+            <span class="chip">
+              Resume Memory
+            </span>
+          </section>
+          <aside class="side">
+            <h4>
+              Related
+            </h4>
+            <p class="muted">
+              Related content block.
+            </p>
+          </aside>
+        </div>
+      </section>
+    </main>
+    <script src="https://imasdk.googleapis.com/js/sdkloader/ima3.js">
+    </script>
+    <script src="https://vjs.zencdn.net/8.23.4/video.min.js">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/videojs-contrib-ads@7.5.2/dist/videojs-contrib-ads.min.js">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/videojs-ima@2.4.0/dist/videojs.ima.min.js">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/videojs-hls-quality-selector@2.0.0/dist/videojs-hls-quality-selector.min.js">
+    </script>
+    <script>
+      (function() {
+
+        const cfg = {
+          sourceUrl: {
+            {
+              src | tojson
+            }
+          },
+          adTagUrl: {
+            {
+              vast_ad_tag_url | tojson
+            }
+          },
+          midRolls: {
+            {
+              midroll_markers | tojson
+            }
+          },
+          postRoll: {
+            {
+              postroll_enabled | tojson
+            }
+          },
+          resumeKey: "resume_" + btoa({
+            {
+              src | tojson
+            }
+          }).slice(0, 20)
+        };
+
+        const playedMidrolls = new Set();
+        let postRollPlayed = false;
+
+        const player = videojs("streamPlayer", {
+          fluid: true,
+          responsive: true,
+          playbackRates: [0.5, 0.75, 1, 1.25, 1.5, 2],
+          controlBar: {
+            pictureInPictureToggle: true
+          }
+        });
+
+        const isHls = /\.m3u8(\?|$)/i.test(cfg.sourceUrl);
+
+        player.src({
+          src: cfg.sourceUrl,
+          type: isHls ? "application/x-mpegURL": "video/mp4"
+        });
+
+        player.ready(function() {
+
+          if (player.hlsQualitySelector) {
+            player.hlsQualitySelector({
+              displayCurrentQuality: true
+            });
+          }
+
+          const savedTime = Number(localStorage.getItem(cfg.resumeKey) || 0);
+
+          if (savedTime > 15) {
+            player.currentTime(savedTime);
+          }
+        });
+
+        player.on("timeupdate",
+        function() {
+
+          localStorage.setItem(cfg.resumeKey, Math.floor(player.currentTime()));
+
+          checkMidroll();
+        });
+
+        player.on("ended",
+        function() {
+          if (cfg.postRoll && !postRollPlayed) {
+            postRollPlayed = true;
+            requestPostRoll();
+          }
+        });
+
+        player.ima({
+          adTagUrl: cfg.adTagUrl,
+          debug: false,
+          timeout: 5000,
+          prerollTimeout: 5000
+        });
+
+        player.ready(function() {
+
+          try {
+            player.ima.initializeAdDisplayContainer();
+          } catch(e) {}
+
+          player.one("play",
+          function() {
+            player.ima.requestAds();
+          });
+        });
+
+        player.on("aderror",
+        function() {
+          player.play().
+          catch(() = >{});
+        });
+
+        player.on("adserror",
+        function() {
+          player.play().
+          catch(() = >{});
+        });
+
+        function checkMidroll() {
+
+          const duration = player.duration() || 0;
+          const current = player.currentTime() || 0;
+
+          if (!duration || !cfg.midRolls || !cfg.midRolls.length) {
+            return;
+          }
+
+          cfg.midRolls.forEach(function(marker, index) {
+
+            let triggerTime = marker <= 100 ? duration * (marker / 100) : marker;
+
+            if (current >= triggerTime && !playedMidrolls.has(index)) {
+
+              playedMidrolls.add(index);
+
+              try {
+                player.ima.changeAdTag(cfg.adTagUrl);
+                player.ima.requestAds();
+              } catch(e) {}
+            }
+          });
+        }
+
+        function requestPostRoll() {
+
+          try {
+            player.ima.changeAdTag(cfg.adTagUrl);
+            player.ima.requestAds();
+          } catch(e) {}
+        }
+
+        document.addEventListener("keydown",
+        function(e) {
+
+          if (e.code === "Space") {
+            e.preventDefault();
+            player.paused() ? player.play() : player.pause();
+          }
+
+          if (e.key === "f") {
+            player.requestFullscreen();
+          }
+
+          if (e.key === "m") {
+            player.muted(!player.muted());
+          }
+
+          if (e.key === "ArrowRight") {
+            player.currentTime(player.currentTime() + 10);
+          }
+
+          if (e.key === "ArrowLeft") {
+            player.currentTime(player.currentTime() - 10);
+          }
+        });
+
+        document.getElementById("theaterBtn").onclick = function() {
+          document.getElementById("pageWrap").classList.toggle("theater");
+        };
+
+        document.getElementById("shareBtn").onclick = async
+        function() {
+
+          const menu = document.getElementById("shareMenu");
+          const url = location.href;
+
+          if (navigator.share) {
+            try {
+              await navigator.share({
+                title: document.title,
+                url: url
+              });
+              return;
+            } catch(e) {}
+          }
+
+          menu.classList.toggle("open");
+
+          menu.innerHTML = ` < button class = "btn"id = "copyLink" > Copy link < /button>
+        <a class="btn" target="_blank" href="https:/ / wa.me / ?text = $ {
+            encodeURIComponent(url)
+          }
+          ">WhatsApp</a>
+        <a class="btn " target="_blank " href="https: //t.me/share/url?url=${encodeURIComponent(url)}">Telegram</a>
+          < a class = "btn"target = "_blank"href = "https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}" > Twitter / X < /a>
+    `;
+
+    document.getElementById("copyLink").onclick = async function(){
+        await navigator.clipboard.writeText(url);
+        menu.classList.remove("open");
+    };
+};
+
 })();
-</script>
-</body></html>
+/
+    </script>
+  </body>
+
+</html>
