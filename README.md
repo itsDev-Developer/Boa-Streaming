@@ -547,3 +547,45 @@ This project is not affiliated with Telegram. Use it responsibly and in complian
   <a href="https://github.com/fyaz05/FileToLink/issues/new">Report Bug</a> •
   <a href="https://github.com/fyaz05/FileToLink/issues/new">Request Feature</a>
 </p>
+
+## 🎬 Frontend Upgrade (Video.js + Ads)
+
+Thunder now uses **Video.js** for in-browser playback with HLS/MP4 support, adaptive bitrate playback, playback speed, Picture-in-Picture, fullscreen, and quality selection.
+
+### New Environment Variables
+
+```env
+VIDEO_VAST_AD_TAG_URL=https://pubads.g.doubleclick.net/gampad/ads?...sample
+VIDEO_MIDROLL_MARKERS=120,300,900
+VIDEO_POSTROLL_ENABLED=True
+
+BANNER_TOP_AD_CODE=<script async src="https://ad-network.example/top.js"></script>
+BANNER_BOTTOM_AD_CODE=<script async src="https://ad-network.example/bottom.js"></script>
+
+DIRECT_DOWNLOAD_AD_URL=https://ad-network.example/offer
+DOWNLOAD_AD_COOLDOWN_MS=30000
+```
+
+### Ads Setup
+
+- **Banner ads**: configured through `BANNER_TOP_AD_CODE` and `BANNER_BOTTOM_AD_CODE` and lazy-rendered near the player.
+- **Video ads (VAST/IMA)**: set `VIDEO_VAST_AD_TAG_URL`. The player triggers pre-roll automatically, optional mid-roll markers via `VIDEO_MIDROLL_MARKERS`, and post-roll via `VIDEO_POSTROLL_ENABLED`.
+- **Direct-link download ads**: users pass through a direct ad window before secure download starts. Includes popup-block fallback and cooldown guard.
+
+### Installation / Deployment Notes
+
+1. Update `config.env` with the ad variables above.
+2. Redeploy app (`docker compose`, Koyeb, Render, Railway, or your existing process).
+3. Open a `/watch/...` URL and verify:
+   - HLS/MP4 playback
+   - player controls
+   - banner placement
+   - ad playback transitions
+4. Open a download URL and verify ad click-through then file download.
+
+### Troubleshooting
+
+- If VAST ads do not start, verify ad tag URL response and CORS policy.
+- If playback freezes after ads, ensure the ad server returns valid media and test with a known-good sample VAST tag.
+- If download ad does not open, browser popup blocking is enabled: allow popups for your domain.
+- If quality selector does not show for MP4, this is expected when only a single rendition is available.

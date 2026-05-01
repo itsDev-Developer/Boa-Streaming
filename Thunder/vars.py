@@ -100,3 +100,11 @@ class Var:
     MAX_FILES_PER_PERIOD: int = int(os.getenv("MAX_FILES_PER_PERIOD", "2"))
     RATE_LIMIT_PERIOD_MINUTES: int = int(os.getenv("RATE_LIMIT_PERIOD_MINUTES", "1"))
     MAX_QUEUE_SIZE: int = int(os.getenv("MAX_QUEUE_SIZE", "100"))
+
+    VIDEO_VAST_AD_TAG_URL: str = os.getenv("VIDEO_VAST_AD_TAG_URL", "")
+    VIDEO_MIDROLL_MARKERS: str = os.getenv("VIDEO_MIDROLL_MARKERS", "300")
+    VIDEO_POSTROLL_ENABLED: bool = str_to_bool(os.getenv("VIDEO_POSTROLL_ENABLED", "True"))
+    BANNER_TOP_AD_CODE: str = os.getenv("BANNER_TOP_AD_CODE", "")
+    BANNER_BOTTOM_AD_CODE: str = os.getenv("BANNER_BOTTOM_AD_CODE", "")
+    DIRECT_DOWNLOAD_AD_URL: str = os.getenv("DIRECT_DOWNLOAD_AD_URL", "https://example.com")
+    DOWNLOAD_AD_COOLDOWN_MS: int = int(os.getenv("DOWNLOAD_AD_COOLDOWN_MS", "30000"))

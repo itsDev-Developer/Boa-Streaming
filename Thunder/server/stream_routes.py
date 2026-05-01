@@ -12,7 +12,7 @@ from Thunder.bot import StreamBot, multi_clients, work_loads
 from Thunder.server.exceptions import FileNotFound, InvalidHash
 from Thunder.utils.custom_dl import ByteStreamer
 from Thunder.utils.logger import logger
-from Thunder.utils.render_template import render_page
+from Thunder.utils.render_template import render_home_page, render_page
 from Thunder.utils.time_format import get_readable_time
 
 routes = web.RouteTableDef()
@@ -128,8 +128,20 @@ def parse_range_header(range_header: str, file_size: int) -> tuple[int, int]:
 
 
 @routes.get("/", allow_head=True)
-async def root_redirect(request):
-    raise web.HTTPFound("https://github.com/fyaz05/FileToLink")
+async def home_page(request: web.Request):
+    uptime = time.time() - StartTime
+    rendered_page = await render_home_page(
+        active_clients=len(multi_clients),
+        total_workload=sum(work_loads.values()),
+        uptime=get_readable_time(uptime),
+    )
+    response = web.Response(
+        text=rendered_page,
+        content_type="text/html",
+        headers={"X-Content-Type-Options": "nosniff"},
+    )
+    response.enable_compression()
+    return response
 
 
 @routes.get("/status", allow_head=True)
