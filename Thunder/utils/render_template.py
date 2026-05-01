@@ -3,6 +3,7 @@
 import asyncio
 import html as html_module
 import urllib.parse
+import re
 
 from jinja2 import Environment, FileSystemLoader
 from pyrogram.errors import FloodWait
@@ -43,16 +44,24 @@ async def render_page(id: int, secure_hash: str, requested_action: str | None = 
         safe_filename = html_module.escape(file_name)
         if requested_action == 'stream':
             template = template_env.get_template('req.html')
+            markers = [int(m) for m in re.split(r'[,\s]+', Var.VIDEO_MIDROLL_MARKERS.strip()) if m.isdigit()]
             context = {
                 'heading': f"View {safe_filename}",
                 'file_name': safe_filename,
-                'src': f"{src}?disposition=inline"
+                'src': f"{src}?disposition=inline",
+                'vast_ad_tag_url': Var.VIDEO_VAST_AD_TAG_URL,
+                'midroll_markers': markers,
+                'postroll_enabled': Var.VIDEO_POSTROLL_ENABLED,
+                'banner_top_ad_code': Var.BANNER_TOP_AD_CODE,
+                'banner_bottom_ad_code': Var.BANNER_BOTTOM_AD_CODE,
             }
         else:
             template = template_env.get_template('dl.html')
             context = {
                 'file_name': safe_filename,
-                'src': src
+                'src': src,
+                'direct_download_ad_url': Var.DIRECT_DOWNLOAD_AD_URL,
+                'download_ad_cooldown_ms': Var.DOWNLOAD_AD_COOLDOWN_MS,
             }
         return await template.render_async(**context)
     except Exception as e:
