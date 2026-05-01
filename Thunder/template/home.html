@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="a07bc7a17116a19b6aef61593604726d4af990ec" content="a07bc7a17116a19b6aef61593604726d4af990ec" />
+  <title>{{ app_name }} · Streaming Gateway</title>
+  <style>
+    :root{--bg:#080d1f;--bg2:#121b37;--text:#e9eeff;--muted:#9aacd9;--brand:#5f8bff;--card:#131d3d}
+    *{box-sizing:border-box} body{margin:0;color:var(--text);font-family:Inter,system-ui;background:radial-gradient(circle at top,#1b2a5a,var(--bg));}
+    .container{max-width:1100px;margin:auto;padding:20px}
+    .hero{padding:52px 0 28px;text-align:center}.hero h1{font-size:clamp(1.8rem,4vw,3rem);margin:.2rem 0}
+    .hero p{color:var(--muted);max-width:760px;margin:0 auto 18px}
+    .cta{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+    .btn{padding:11px 16px;border-radius:12px;border:1px solid #334a84;text-decoration:none;color:#fff;background:#1c2b54;font-weight:700}
+    .btn.primary{background:linear-gradient(90deg,var(--brand),#8d67ff);border-color:transparent}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:18px}
+    .card{background:linear-gradient(180deg,#1a2750,var(--card));border:1px solid #2b3d71;border-radius:14px;padding:16px;box-shadow:0 12px 30px #0005}
+    .k{color:var(--muted);font-size:.86rem;margin-bottom:8px;text-transform:uppercase;letter-spacing:.07em}.v{font-size:1.2rem;font-weight:700}
+    .footer{margin:24px 0 8px;color:var(--muted);text-align:center;font-size:.9rem}
+  </style>
+</head>
+<body>
+  <main class="container">
+    <section class="hero">
+      <h1>{{ app_name }}</h1>
+      <p>Professional streaming delivery for Telegram-hosted media. Stream in-browser with adaptive playback or download through secure, ad-enabled flow.</p>
+      <div class="cta">
+        <a class="btn primary" href="{{ repo_url }}" target="_blank" rel="noopener">View Source</a>
+        <a class="btn" href="/status">Server Status</a>
+      </div>
+    </section>
+    <section class="grid">
+      <article class="card"><div class="k">Version</div><div class="v">{{ version }}</div></article>
+      <article class="card"><div class="k">Uptime</div><div class="v">{{ uptime }}</div></article>
+      <article class="card"><div class="k">Active Clients</div><div class="v">{{ active_clients }}</div></article>
+      <article class="card"><div class="k">Total Workload</div><div class="v">{{ total_workload }}</div></article>
+    </section>
+    <p class="footer">Use generated /watch links for streaming and direct links for downloads.</p>
+  </main>
+</body>
+</html>
