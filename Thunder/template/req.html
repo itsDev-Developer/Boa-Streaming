@@ -1,321 +1,197 @@
 <!DOCTYPE html>
 <html lang="en">
-  
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>
-      {{ heading }}
-    </title>
-    <link rel="icon" href="https://i.ibb.co/qJyZWCv/20230629-081948-0000.png"
-    />
-    <link href="https://vjs.zencdn.net/8.23.4/video-js.css" rel="stylesheet"
-    />
+    <title>{{ heading }}</title>
+    <link rel="icon" href="https://i.ibb.co/qJyZWCv/20230629-081948-0000.png" />
+    <link href="https://vjs.zencdn.net/8.23.4/video-js.css" rel="stylesheet" />
     <style>
-      :root{ --bg:#090d1a; --panel:#11192f; --text:#ecf1ff; --muted:#9baed8;
-      --brand:#7c5cff; --brand2:#16a3ff; --line:#2a3761; } *{box-sizing:border-box}
-      body{ margin:0; background:radial-gradient(circle at top,#1a2851,var(--bg));
-      font-family:Inter,system-ui; color:var(--text); } .wrap{ max-width:1200px;
-      margin:auto; padding:16px; } .panel{ background:linear-gradient(180deg,#18264b,#0f162e);
-      border:1px solid var(--line); border-radius:18px; padding:16px; } .head{
-      display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;
-      } .title{ margin:0; } .muted{ color:var(--muted); } .actions{ display:flex;
-      gap:10px; } .btn{ border:1px solid #3f528d; border-radius:12px; padding:10px
-      14px; background:#202f5a; color:#fff; cursor:pointer; text-decoration:none;
-      } .btn.primary{ border:0; background:linear-gradient(90deg,var(--brand),var(--brand2));
-      } .video-shell{ margin-top:14px; border-radius:14px; overflow:hidden; background:#000;
-      aspect-ratio:16/9; } .video-js{ width:100%; height:100%; } .rail{ display:grid;
-      grid-template-columns:1fr 320px; gap:14px; margin-top:14px; } .side,.meta{
-      background:#0f1730; border:1px solid #273766; border-radius:14px; padding:12px;
-      } .chip{ display:inline-block; padding:4px 8px; border-radius:999px; border:1px
-      solid #33477b; margin-right:6px; } .share-menu{ display:none; position:absolute;
-      right:0; top:40px; background:#101936; border:1px solid #415ca1; border-radius:10px;
-      padding:8px; z-index:100; } .share-menu.open{ display:block; } .share-menu
-      a, .share-menu button{ display:block; width:100%; margin:4px 0; } .theater{
-      max-width:100vw; } .theater .panel{ border-radius:0; } @media (max-width:980px){
-      .rail{ grid-template-columns:1fr; } }
+      :root { --bg:#090d1a; --panel:#11192f; --text:#ecf1ff; --muted:#9baed8; --brand:#7c5cff; --brand2:#16a3ff; --line:#2a3761; }
+      * { box-sizing:border-box; }
+      body { margin:0; background:radial-gradient(circle at top,#1a2851,var(--bg)); font-family:Inter,system-ui; color:var(--text); }
+      .wrap { max-width:1200px; margin:auto; padding:16px; }
+      .panel { background:linear-gradient(180deg,#18264b,#0f162e); border:1px solid var(--line); border-radius:18px; padding:16px; box-shadow:0 10px 35px rgba(0,0,0,.25); }
+      .head { display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:flex-start; }
+      .title { margin:0; font-size:1.2rem; line-height:1.35; }
+      .muted { color:var(--muted); margin:.4rem 0 0; }
+      .actions { display:flex; gap:10px; flex-wrap:wrap; }
+      .btn { border:1px solid #3f528d; border-radius:12px; padding:10px 14px; background:#202f5a; color:#fff; cursor:pointer; text-decoration:none; font-weight:600; }
+      .btn:hover { filter:brightness(1.08); }
+      .btn.primary { border:0; background:linear-gradient(90deg,var(--brand),var(--brand2)); }
+      .video-shell { margin-top:14px; border-radius:14px; overflow:hidden; background:#000; aspect-ratio:16/9; }
+      .video-js { width:100%; height:100%; }
+      .rail { display:grid; grid-template-columns:1fr 320px; gap:14px; margin-top:14px; }
+      .side,.meta { background:#0f1730; border:1px solid #273766; border-radius:14px; padding:12px; }
+      .chip { display:inline-block; padding:4px 8px; border-radius:999px; border:1px solid #33477b; margin-right:6px; margin-bottom:4px; }
+      .share-wrap { position:relative; }
+      .share-menu { display:none; position:absolute; right:0; top:46px; width:220px; background:#101936; border:1px solid #415ca1; border-radius:10px; padding:8px; z-index:100; }
+      .share-menu.open { display:block; }
+      .share-menu a,.share-menu button { display:block; width:100%; margin:4px 0; text-align:left; }
+      .theater { max-width:100vw; padding:0; }
+      .theater .panel { border-radius:0; min-height:100vh; }
+      @media (max-width:980px) { .rail{ grid-template-columns:1fr; } }
     </style>
   </head>
-  
   <body>
     {% from 'partials_ad_banner.html' import banner %}
     <main class="wrap" id="pageWrap">
       <section class="panel">
         <header class="head">
           <div>
-            <h1 class="title">
-              {{ file_name }}
-            </h1>
-            <p class="muted">
-              Premium streaming player with ad-safe fallback and quick sharing.
-            </p>
+            <h1 class="title">{{ file_name }}</h1>
+            <p class="muted">Premium streaming player with improved playback and ad-safe fallback.</p>
           </div>
           <div class="actions">
-            <a class="btn primary" href="{{ src }}" download="{{ file_name }}">
-              Download
-            </a>
-            <button class="btn" id="shareBtn">
-              Share
-            </button>
-            <button class="btn" id="theaterBtn">
-              Theater
-            </button>
+            <a class="btn primary" href="{{ src }}" download="{{ file_name }}">Download</a>
+            <div class="share-wrap">
+              <button class="btn" id="shareBtn" type="button">Share</button>
+              <div id="shareMenu" class="share-menu"></div>
+            </div>
+            <button class="btn" id="theaterBtn" type="button">Theater</button>
           </div>
         </header>
-        <div style="position:relative">
-          {{ banner('video-top', banner_top_ad_code, 'is-loading') }}
-          <div id="shareMenu" class="share-menu">
-          </div>
-        </div>
+        {{ banner('video-top', banner_top_ad_code, 'is-loading') }}
         <div class="video-shell">
-          <video id="streamPlayer" class="video-js vjs-big-play-centered" controls
-          playsinline preload="metadata">
-          </video>
+          <video id="streamPlayer" class="video-js vjs-big-play-centered" controls playsinline preload="metadata"></video>
         </div>
         {{ banner('video-bottom', banner_bottom_ad_code, 'is-loading') }}
         <div class="rail">
           <section class="meta">
-            <span class="chip">
-              HLS + MP4
-            </span>
-            <span class="chip">
-              IMA Ads
-            </span>
-            <span class="chip">
-              Resume Memory
-            </span>
+            <span class="chip">HLS + MP4</span>
+            <span class="chip">VAST Ads</span>
+            <span class="chip">Resume Memory</span>
           </section>
           <aside class="side">
-            <h4>
-              Related
-            </h4>
-            <p class="muted">
-              Related content block.
-            </p>
+            <h4>Tips</h4>
+            <p class="muted">Use space to play/pause, ←/→ to seek, and f for fullscreen.</p>
           </aside>
         </div>
       </section>
     </main>
-    <script src="https://imasdk.googleapis.com/js/sdkloader/ima3.js">
-    </script>
-    <script src="https://vjs.zencdn.net/8.23.4/video.min.js">
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/videojs-contrib-ads@7.5.2/dist/videojs-contrib-ads.min.js">
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/videojs-ima@2.4.0/dist/videojs.ima.min.js">
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/videojs-hls-quality-selector@2.0.0/dist/videojs-hls-quality-selector.min.js">
-    </script>
-    <script>
-      (function() {
 
+    <script src="https://imasdk.googleapis.com/js/sdkloader/ima3.js"></script>
+    <script src="https://vjs.zencdn.net/8.23.4/video.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/videojs-contrib-ads@7.5.2/dist/videojs-contrib-ads.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/videojs-ima@2.4.0/dist/videojs.ima.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/videojs-hls-quality-selector@2.0.0/dist/videojs-hls-quality-selector.min.js"></script>
+    <script>
+      (function () {
         const cfg = {
-          sourceUrl: {
-            {
-              src | tojson
-            }
-          },
-          adTagUrl: {
-            {
-              vast_ad_tag_url | tojson
-            }
-          },
-          midRolls: {
-            {
-              midroll_markers | tojson
-            }
-          },
-          postRoll: {
-            {
-              postroll_enabled | tojson
-            }
-          },
-          resumeKey: "resume_" + btoa({
-            {
-              src | tojson
-            }
-          }).slice(0, 20)
+          sourceUrl: {{ src | tojson }},
+          adTagUrl: {{ vast_ad_tag_url | tojson }},
+          midRolls: {{ midroll_markers | tojson }},
+          postRoll: {{ postroll_enabled | tojson }},
+          resumeKey: "resume_" + btoa({{ src | tojson }}).slice(0, 20)
         };
 
         const playedMidrolls = new Set();
         let postRollPlayed = false;
+        let adsAvailable = typeof cfg.adTagUrl === "string" && /^https?:\/\//i.test(cfg.adTagUrl);
 
         const player = videojs("streamPlayer", {
           fluid: true,
           responsive: true,
           playbackRates: [0.5, 0.75, 1, 1.25, 1.5, 2],
-          controlBar: {
-            pictureInPictureToggle: true
-          }
+          controlBar: { pictureInPictureToggle: true }
         });
 
         const isHls = /\.m3u8(\?|$)/i.test(cfg.sourceUrl);
+        player.src({ src: cfg.sourceUrl, type: isHls ? "application/x-mpegURL" : "video/mp4" });
 
-        player.src({
-          src: cfg.sourceUrl,
-          type: isHls ? "application/x-mpegURL": "video/mp4"
-        });
-
-        player.ready(function() {
-
-          if (player.hlsQualitySelector) {
-            player.hlsQualitySelector({
-              displayCurrentQuality: true
-            });
+        player.ready(function () {
+          if (player.hlsQualitySelector && isHls) {
+            player.hlsQualitySelector({ displayCurrentQuality: true });
           }
-
           const savedTime = Number(localStorage.getItem(cfg.resumeKey) || 0);
-
-          if (savedTime > 15) {
-            player.currentTime(savedTime);
-          }
+          if (savedTime > 15) player.currentTime(savedTime);
         });
 
-        player.on("timeupdate",
-        function() {
-
+        player.on("timeupdate", function () {
           localStorage.setItem(cfg.resumeKey, Math.floor(player.currentTime()));
-
           checkMidroll();
         });
 
-        player.on("ended",
-        function() {
-          if (cfg.postRoll && !postRollPlayed) {
+        player.on("ended", function () {
+          if (cfg.postRoll && !postRollPlayed && adsAvailable) {
             postRollPlayed = true;
-            requestPostRoll();
+            requestAdBreak();
           }
         });
 
-        player.ima({
-          adTagUrl: cfg.adTagUrl,
-          debug: false,
-          timeout: 5000,
-          prerollTimeout: 5000
-        });
+        if (adsAvailable && player.ima) {
+          player.ima({ adTagUrl: cfg.adTagUrl, debug: false, timeout: 4000, prerollTimeout: 4000 });
 
-        player.ready(function() {
-
-          try {
-            player.ima.initializeAdDisplayContainer();
-          } catch(e) {}
-
-          player.one("play",
-          function() {
-            player.ima.requestAds();
+          player.ready(function () {
+            try { player.ima.initializeAdDisplayContainer(); } catch (_) {}
+            player.one("play", function () { requestAdBreak(); });
           });
-        });
 
-        player.on("aderror",
-        function() {
-          player.play().
-          catch(() = >{});
-        });
+          player.on("aderror", disableAdsFallback);
+          player.on("adserror", disableAdsFallback);
+        }
 
-        player.on("adserror",
-        function() {
-          player.play().
-          catch(() = >{});
-        });
+        function disableAdsFallback() {
+          adsAvailable = false;
+          player.play().catch(function () {});
+        }
+
+        function requestAdBreak() {
+          try {
+            player.ima.changeAdTag(cfg.adTagUrl);
+            player.ima.requestAds();
+          } catch (_) {
+            disableAdsFallback();
+          }
+        }
 
         function checkMidroll() {
-
           const duration = player.duration() || 0;
           const current = player.currentTime() || 0;
+          if (!adsAvailable || !duration || !Array.isArray(cfg.midRolls) || !cfg.midRolls.length) return;
 
-          if (!duration || !cfg.midRolls || !cfg.midRolls.length) {
-            return;
-          }
-
-          cfg.midRolls.forEach(function(marker, index) {
-
-            let triggerTime = marker <= 100 ? duration * (marker / 100) : marker;
-
+          cfg.midRolls.forEach(function (marker, index) {
+            const triggerTime = marker <= 100 ? duration * (marker / 100) : marker;
             if (current >= triggerTime && !playedMidrolls.has(index)) {
-
               playedMidrolls.add(index);
-
-              try {
-                player.ima.changeAdTag(cfg.adTagUrl);
-                player.ima.requestAds();
-              } catch(e) {}
+              requestAdBreak();
             }
           });
         }
 
-        function requestPostRoll() {
-
-          try {
-            player.ima.changeAdTag(cfg.adTagUrl);
-            player.ima.requestAds();
-          } catch(e) {}
-        }
-
-        document.addEventListener("keydown",
-        function(e) {
-
-          if (e.code === "Space") {
-            e.preventDefault();
-            player.paused() ? player.play() : player.pause();
-          }
-
-          if (e.key === "f") {
-            player.requestFullscreen();
-          }
-
-          if (e.key === "m") {
-            player.muted(!player.muted());
-          }
-
-          if (e.key === "ArrowRight") {
-            player.currentTime(player.currentTime() + 10);
-          }
-
-          if (e.key === "ArrowLeft") {
-            player.currentTime(player.currentTime() - 10);
-          }
+        document.addEventListener("keydown", function (e) {
+          if (e.target && /input|textarea/i.test(e.target.tagName)) return;
+          if (e.code === "Space") { e.preventDefault(); player.paused() ? player.play() : player.pause(); }
+          if (e.key === "f") player.requestFullscreen();
+          if (e.key === "m") player.muted(!player.muted());
+          if (e.key === "ArrowRight") player.currentTime(player.currentTime() + 10);
+          if (e.key === "ArrowLeft") player.currentTime(Math.max(0, player.currentTime() - 10));
         });
 
-        document.getElementById("theaterBtn").onclick = function() {
+        document.getElementById("theaterBtn").addEventListener("click", function () {
           document.getElementById("pageWrap").classList.toggle("theater");
-        };
+        });
 
-        document.getElementById("shareBtn").onclick = async
-        function() {
-
-          const menu = document.getElementById("shareMenu");
+        const shareMenu = document.getElementById("shareMenu");
+        document.getElementById("shareBtn").addEventListener("click", async function () {
           const url = location.href;
-
           if (navigator.share) {
-            try {
-              await navigator.share({
-                title: document.title,
-                url: url
-              });
-              return;
-            } catch(e) {}
+            try { await navigator.share({ title: document.title, url }); return; } catch (_) {}
           }
 
-          menu.classList.toggle("open");
-
-          menu.innerHTML = ` < button class = "btn"id = "copyLink" > Copy link < /button>
-        <a class="btn" target="_blank" href="https:/ / wa.me / ?text = $ {
-            encodeURIComponent(url)
-          }
-          ">WhatsApp</a>
-        <a class="btn " target="_blank " href="https: //t.me/share/url?url=${encodeURIComponent(url)}">Telegram</a>
-          < a class = "btn"target = "_blank"href = "https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}" > Twitter / X < /a>
-    `;
-
-    document.getElementById("copyLink").onclick = async function(){
-        await navigator.clipboard.writeText(url);
-        menu.classList.remove("open");
-    };
-};
-
-})();
-/
+          shareMenu.classList.toggle("open");
+          shareMenu.innerHTML = `
+            <button class="btn" id="copyLink" type="button">Copy link</button>
+            <a class="btn" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(url)}">WhatsApp</a>
+            <a class="btn" target="_blank" rel="noopener" href="https://t.me/share/url?url=${encodeURIComponent(url)}">Telegram</a>
+            <a class="btn" target="_blank" rel="noopener" href="https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}">Twitter / X</a>
+          `;
+          document.getElementById("copyLink").addEventListener("click", async function () {
+            await navigator.clipboard.writeText(url);
+            shareMenu.classList.remove("open");
+          });
+        });
+      })();
     </script>
   </body>
-
 </html>
