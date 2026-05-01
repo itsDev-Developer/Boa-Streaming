@@ -50,6 +50,7 @@ async def render_page(id: int, secure_hash: str, requested_action: str | None = 
                 'heading': f"View {safe_filename}",
                 'file_name': safe_filename,
                 'src': f"{src}?disposition=inline",
+                'direct_download_url': f"{src}?disposition=attachment",
                 'vast_ad_tag_url': Var.VIDEO_VAST_AD_TAG_URL,
                 'midroll_markers': markers,
                 'postroll_enabled': Var.VIDEO_POSTROLL_ENABLED,

@@ -182,7 +182,7 @@ Premium streaming player with ads support.
 <div class="actions">
 
 <a
-href="{{src}}"
+href="{{direct_download_url}}"
 download="{{file_name}}"
 class="btn-custom btn-primary-custom"
 >
@@ -263,7 +263,7 @@ This site does not host any files. Content is served from third-party servers.
 document.addEventListener("DOMContentLoaded", function () {
 
 const sourceUrl = "{{src}}";
-const adTagUrl = "https://active-bat.com/dkm/F/z.dkGKNhvLZmGEUd/OeSm-9kuQZrUwlSkJPSTqYR1RMvj/Qm4sNijTcltiNPj/U/y/N/DRgd2VONC_ZGsmamW/1wpzd/DA0cxP";
+const adTagUrl = {{ vast_ad_tag_url|tojson }};
 
 const resumeKey =
 'resume_' + btoa(sourceUrl).slice(0,20);
@@ -299,7 +299,7 @@ player.ready(function(){
     debug:false,
     timeout:5000,
     prerollTimeout:5000,
-    autoPlayAdBreaks:false
+    autoPlayAdBreaks:true
   });
 
   try{
@@ -319,7 +319,9 @@ player.ready(function(){
   });
 
   // PRE-ROLL
-  player.ima.requestAds();
+  if (adTagUrl) {
+    player.ima.requestAds();
+  }
 
   player.play();
 
@@ -329,16 +331,20 @@ player.ready(function(){
       player.ima &&
       !player.ima.adIsPlaying()
     ){
-      player.ima.changeAdTag(adTagUrl);
-      player.ima.requestAds();
+      if (adTagUrl) {
+        player.ima.changeAdTag(adTagUrl);
+        player.ima.requestAds();
+      }
       player.play();
     }
   });
 
   // POST-ROLL
   player.on('ended', function(){
-    player.ima.changeAdTag(adTagUrl);
-    player.ima.requestAds();
+    if (adTagUrl) {
+      player.ima.changeAdTag(adTagUrl);
+      player.ima.requestAds();
+    }
   });
 
 });
